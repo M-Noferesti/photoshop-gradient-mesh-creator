@@ -54,12 +54,20 @@
         </div>
         <p id="edgeEditor" class="editor-help" hidden>Drag the diamond to move this point. With Smooth outline on, drag a Bézier handle beyond the preview edge. Its opposite stays in a straight line; hold Alt to move one handle independently.</p>
       </div>
-      <div class="section-title second"><span>03</span><h2>Output</h2></div>
+      <div class="section-title second"><span>03</span><h2>Saved meshes</h2></div>
+      <div class="save-row"><input id="presetName" type="text" maxlength="40" placeholder="Name this mesh" aria-label="Mesh name"><button id="savePreset" type="button">Save mesh</button></div>
+      <div id="presetGallery" class="preset-gallery" aria-label="Saved mesh previews"></div>
+      <p class="output-note">Saved meshes include the outline, Bézier handles, colors, and output settings on this computer.</p>
+      <div class="section-title second"><span>04</span><h2>Output</h2></div>
       <div class="dimensions"><label>W <input id="outputWidth" type="number" min="1" max="8192" value="2048"></label><span>×</span><label>H <input id="outputHeight" type="number" min="1" max="8192" value="2048"></label></div>
       <label class="toggle-row"><input id="fitLayer" type="checkbox" checked><span>Fit imported layer inside document</span></label>
       <p class="output-note">Layer and PNG use the width and height above. Fit only changes the layer's placement.</p>
       <button id="useDocument" class="text-button">Use active document size ↗</button>
-      <button id="addLayer" class="primary-button">Add as Photoshop layer <span>↗</span></button>
+      <button id="addLayer" class="primary-button">Create editable Photoshop layer <span>↗</span></button>
+      <button id="updateLayer" class="secondary-button" type="button" disabled>Update linked layer</button>
+      <button id="loadActiveLayer" class="text-button" type="button">Edit selected mesh layer ↗</button>
+      <label class="toggle-row"><input id="liveUpdate" type="checkbox" checked><span>Update linked layer after edits</span></label>
+      <p id="linkStatus" class="output-note">No Photoshop layer linked yet.</p>
       <button id="download" class="secondary-button">Download PNG</button>
       <p id="status" class="status" role="status" aria-live="polite">Ready to create.</p>
     </section>

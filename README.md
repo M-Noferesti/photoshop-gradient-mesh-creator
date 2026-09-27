@@ -9,18 +9,18 @@
 
   <p>
     <img alt="Photoshop CEP" src="https://img.shields.io/badge/Photoshop-CEP%20panel-121820?style=for-the-badge&logo=adobephotoshop&logoColor=31A8FF" />
-    <img alt="Version 1.3.3" src="https://img.shields.io/badge/version-1.3.3-121820?style=for-the-badge" />
+    <img alt="Version 1.4.0" src="https://img.shields.io/badge/version-1.4.0-121820?style=for-the-badge" />
     <img alt="No npm dependencies" src="https://img.shields.io/badge/dependencies-none-121820?style=for-the-badge" />
   </p>
 </div>
 
 ## What you can make
 
-| Shape the silhouette | Paint with points | Export your way |
+| Shape the silhouette | Paint with points | Save and keep editing |
 | :--- | :--- | :--- |
-| Drag distinct **gold diamond** outline points. Add or remove points and adjust Bézier handles for organic curves. | Drag **colored circles**, double-click the preview to add a color point, and set precise colors with a swatch or hex value. | Save a transparent PNG or add the rendered mesh as a Photoshop layer at your chosen dimensions. |
+| Drag distinct **gold diamond** outline points. Add or remove points and adjust Bézier handles for organic curves. | Drag **colored circles**, double-click the preview to add a color point, and set precise colors with a swatch or hex value. | Save named meshes with thumbnail previews. Create a linked Photoshop Smart Object or download a transparent PNG. |
 
-The preview updates as you edit. **Soft edge** feathers the silhouette, with transparent padding so the fade stays inside the exported image. The resulting Photoshop layer is raster artwork; edit the mesh in the panel and add another layer to make a new version.
+The preview updates as you edit. **Soft edge** feathers the silhouette, with transparent padding so the fade stays inside the exported image.
 
 ## Quick start
 
@@ -36,9 +36,16 @@ The manifest requests **CEP 9 or newer** and Photoshop host version **20 or newe
 2. Drag colored circles to move color points. Double-click inside the preview or choose **+ Color point** to add one. Select a point to use the color swatch, enter a `#RRGGBB` hex value, or sample a color from the preview. **Use Photoshop foreground** reads Photoshop's current foreground color; Photoshop's eyedropper can set it first.
 3. Drag gold diamonds to reshape the boundary. Choose **+ Shape point** to add a point on the selected outline segment. Turn on **Smooth outline** and drag the small incoming and outgoing Bézier handles to tune the curve. Handles can travel beyond the preview edge. Opposite handles stay aligned in a straight tangent; hold **Alt** while dragging to adjust one independently.
 4. Select either point type and press **Delete**, or choose **Delete selected**, to remove it. The mesh retains at least one color point and three shape points.
-5. Adjust **Blend radius** and **Soft edge**. Enter the output width and height, then choose **Add as Photoshop layer** or **Download PNG**.
+5. Adjust **Blend radius** and **Soft edge**. Enter the output width and height, then save the mesh, create a Photoshop layer, or download a PNG.
 
-Each output dimension can be **1–8192 px**, with a maximum of **16 million pixels** total. **Use active document size** fills the width and height fields only when clicked. For Photoshop layers, **Fit imported layer inside document** scales down and centers a layer only when needed to keep it visible; turn it off to preserve the entered pixel size.
+## Saved meshes and live layers
+
+- Enter a name and choose **Save mesh**. A thumbnail appears in **Saved meshes**; select it later to restore its outline, handles, colors, feather, blend, and output settings. Saving the same name updates that entry. Saved meshes are stored locally by the panel on this computer.
+- **Create editable Photoshop layer** places an embedded Smart Object and links it to the current panel mesh. With **Update linked layer after edits** enabled, completed drags and other control changes update that same Smart Object after a short pause. **Update linked layer** sends an immediate manual update.
+- Keep the linked layer selected in Photoshop while editing. If you select another layer, updates pause until you select the linked layer again. After reopening the panel, select the mesh Smart Object and choose **Edit selected mesh layer** to restore its controls.
+- The PSD contains a rendered Smart Object and a mesh identifier. The shape and color control data is stored by the panel on this computer; opening the PSD elsewhere will show the artwork but will not recover the controls unless the saved panel data is available there.
+
+Each output dimension can be **1–8192 px**, with a maximum of **16 million pixels** total. **Use active document size** fills the width and height fields only when clicked. **Fit imported layer inside document** scales down and centers a newly placed layer when needed; it does not change the rendered PNG dimensions.
 
 ## Project map
 
@@ -56,8 +63,8 @@ gradient-mesh-cep/
 
 ## Notes
 
-- A Photoshop layer is a rendered raster image. The controls remain editable in the panel until you close it, but they are not stored as editable mesh data in that layer.
+- The linked Photoshop layer is an embedded Smart Object containing a rendered PNG. Its mesh controls live in the panel's local data, and updates replace the Smart Object contents. This is not a native Photoshop or Illustrator gradient mesh.
 - The extension is source code for local development. It has not been packaged or signed as a ZXP.
-- Photoshop host behavior can vary by CEP version; this project has not been verified across all supported Photoshop releases.
+- The saved mesh gallery was verified in a browser. Smart Object placement and replacement have not yet been verified in a live Photoshop host across supported releases.
 
 **Adobe references:** [CEP Getting Started](https://github.com/Adobe-CEP/Getting-Started-guides) · [CEP resources](https://github.com/Adobe-CEP/CEP-Resources) · [Photoshop plug-in troubleshooting](https://helpx.adobe.com/photoshop/kb/plug-ins-photoshop-troubleshooting.html)

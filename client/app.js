@@ -4,6 +4,8 @@
   var canvas = $("preview"), ctx = canvas.getContext("2d");
   var colors = [], edges = [], selected = { kind: "color", index: 4 };
   var dragging = null, sampling = false, renderQueued = false, paletteIndex = 0;
+  var presetKey = "gradientMesh.saved.v1", layerKey = "gradientMesh.layer.";
+  var presets = [], linkedMarker = null, liveTimer = null, liveBusy = false, meshRevision = 0;
   var palettes = [
     ["#fc7279", "#fdad78", "#e8c57f", "#b583cc", "#f47c91", "#ed8e82", "#766fc1", "#b384cc", "#e9a6b1"],
     ["#1f7b9d", "#58b8a9", "#c8e6ae", "#565cbd", "#77bacd", "#ffd48a", "#282b75", "#bc87b7", "#f89388"],
@@ -21,6 +23,62 @@
   function setStatus(message, error) {
     $("status").textContent = message;
     $("status").className = error ? "status error" : "status";
+  }
+  function captureModel() {
+    return {
+      colors: colors.map(function (p) { return {x:p.x,y:p.y,color:p.color}; }),
+      edges: edges.map(function (p) { return {x:p.x,y:p.y,in:{x:p.in.x,y:p.in.y},out:{x:p.out.x,y:p.out.y}}; }),
+      smooth: $("smoothEdges").checked, spread: Number($("spread").value), feather: Number($("feather").value),
+      width: Number($("outputWidth").value), height: Number($("outputHeight").value), fit: $("fitLayer").checked
+    };
+  }
+  function validModel(model) {
+    function validPoint(p) { return p && isFinite(p.x) && isFinite(p.y) && p.x >= -1 && p.x <= 2 && p.y >= -1 && p.y <= 2; }
+    return model && Array.isArray(model.colors) && model.colors.length >= 1 && model.colors.length <= 64 &&
+      Array.isArray(model.edges) && model.edges.length >= 3 && model.edges.length <= 64 &&
+      model.colors.every(function (p) { return validPoint(p) && validHex(p.color); }) &&
+      model.edges.every(function (p) { return validPoint(p) && validPoint(p.in) && validPoint(p.out); }) &&
+      isFinite(model.spread) && isFinite(model.feather) && isFinite(model.width) && isFinite(model.height) &&
+      model.spread >= 20 && model.spread <= 90 && model.feather >= 0 && model.feather <= 12 &&
+      Number.isInteger(model.width) && Number.isInteger(model.height) &&
+      model.width >= 1 && model.width <= 8192 && model.height >= 1 && model.height <= 8192 &&
+      model.width * model.height <= 16000000;
+  }
+  function applyModel(model) {
+    if (!validModel(model)) { setStatus("This saved mesh is damaged or incompatible.", true); return false; }
+    colors = model.colors.map(function (p) { return {x:p.x,y:p.y,color:p.color}; });
+    edges = model.edges.map(function (p) { return {x:p.x,y:p.y,in:{x:p.in.x,y:p.in.y},out:{x:p.out.x,y:p.out.y}}; });
+    $("smoothEdges").checked = !!model.smooth;
+    $("shape").value = "custom";
+    $("spread").value = model.spread; $("spreadValue").textContent = model.spread + "%";
+    $("feather").value = model.feather; $("featherValue").textContent = model.feather + "%";
+    $("outputWidth").value = model.width; $("outputHeight").value = model.height;
+    $("fitLayer").checked = !!model.fit;
+    selected = {kind:"color",index:0};
+    updateSelected(); queuePreview();
+    return true;
+  }
+  function readPresets() {
+    try {
+      var data = JSON.parse(localStorage.getItem(presetKey) || "[]");
+      return Array.isArray(data) ? data.filter(function (item) { return item && validModel(item.model) && typeof item.name === "string"; }) : [];
+    } catch (error) { return []; }
+  }
+  function saveLinkedModel() {
+    if (!linkedMarker) return;
+    try { localStorage.setItem(layerKey + linkedMarker, JSON.stringify(captureModel())); }
+    catch (error) { setStatus("Could not save editable mesh data on this computer.", true); }
+  }
+  function updateLinkStatus() {
+    $("updateLayer").disabled = !linkedMarker;
+    $("linkStatus").textContent = linkedMarker
+      ? "Linked to a Gradient Mesh Smart Object" + ($("liveUpdate").checked ? " · updates after edits" : " · manual updates")
+      : "No Photoshop layer linked yet.";
+  }
+  function queueLiveUpdate() {
+    if (!linkedMarker || !$("liveUpdate").checked || dragging || liveBusy) return;
+    clearTimeout(liveTimer);
+    liveTimer = setTimeout(function () { updateLinkedLayer(); }, 750);
   }
   function makeColors(size, palette) {
     var result = [];
@@ -173,6 +231,64 @@
     target.drawImage(mask, 0, 0);
     target.restore();
   }
+  function presetThumbnail(model) {
+    var thumb = document.createElement("canvas");
+    thumb.width = thumb.height = 112;
+    renderMesh(thumb.getContext("2d"), 112, 112, model.colors, model.edges, model.spread / 100, model.feather, model.smooth);
+    return thumb.toDataURL("image/png");
+  }
+  function renderPresetGallery() {
+    var gallery = $("presetGallery");
+    gallery.innerHTML = "";
+    if (!presets.length) {
+      var empty = document.createElement("p");
+      empty.className = "preset-empty";
+      empty.textContent = "No saved meshes yet.";
+      gallery.appendChild(empty);
+      return;
+    }
+    presets.forEach(function (preset) {
+      var card = document.createElement("div");
+      card.className = "preset-card";
+      var open = document.createElement("button");
+      open.type = "button"; open.className = "preset-open";
+      open.setAttribute("aria-label", "Load saved mesh " + preset.name);
+      var thumbnail = document.createElement("img");
+      thumbnail.src = preset.preview;
+      thumbnail.alt = "";
+      var label = document.createElement("span");
+      label.textContent = preset.name;
+      open.appendChild(thumbnail); open.appendChild(label);
+      open.addEventListener("click", function () {
+        if (applyModel(preset.model)) { $("presetName").value = preset.name; setStatus("Loaded " + preset.name + "."); }
+      });
+      var remove = document.createElement("button");
+      remove.type = "button"; remove.className = "preset-delete";
+      remove.setAttribute("aria-label", "Delete saved mesh " + preset.name);
+      remove.textContent = "×";
+      remove.addEventListener("click", function () {
+        presets = presets.filter(function (item) { return item.id !== preset.id; });
+        try { localStorage.setItem(presetKey, JSON.stringify(presets)); }
+        catch (error) { setStatus("Could not update saved meshes.", true); return; }
+        renderPresetGallery(); setStatus("Saved mesh deleted.");
+      });
+      card.appendChild(open); card.appendChild(remove); gallery.appendChild(card);
+    });
+  }
+  function saveCurrentPreset() {
+    var name = $("presetName").value.trim() || "Mesh " + (presets.length + 1);
+    var model = captureModel();
+    if (!validModel(model)) { setStatus("Set valid output dimensions before saving.", true); return; }
+    var item = {id:"P-" + Date.now().toString(36),name:name,model:model,preview:presetThumbnail(model)};
+    var existing = presets.findIndex(function (saved) { return saved.name.toLowerCase() === name.toLowerCase(); });
+    if (existing === -1 && presets.length >= 36) { setStatus("Saved mesh library is full. Delete an entry before adding another.", true); return; }
+    if (existing !== -1) { item.id = presets[existing].id; presets.splice(existing, 1); }
+    presets.unshift(item);
+    try { localStorage.setItem(presetKey, JSON.stringify(presets)); }
+    catch (error) { setStatus("Could not save mesh. Local storage may be full.", true); return; }
+    $("presetName").value = name;
+    renderPresetGallery(); setStatus("Saved " + name + " with preview.");
+  }
   function drawHandles() {
     [["color", colors, $("colorHandles")], ["edge", edges, $("edgeHandles")]].forEach(function (group) {
       var kind = group[0], points = group[1], layer = group[2];
@@ -229,6 +345,9 @@
     drawHandles();
   }
   function queuePreview() {
+    meshRevision++;
+    saveLinkedModel();
+    queueLiveUpdate();
     updateOverlay();
     if (renderQueued) return;
     renderQueued = true;
@@ -243,24 +362,64 @@
     if (width * height > 16000000) throw new Error("Maximum output is 16 million pixels.");
     return {width:width,height:height};
   }
-  function buildPng(callback) {
+  function buildPng(callback, onError) {
     var dims;
-    try { dims = outputDimensions(); } catch (error) { setStatus(error.message, true); return; }
+    try { dims = outputDimensions(); } catch (error) { setStatus(error.message, true); if (onError) onError(error); return; }
     setStatus("Rendering " + dims.width + " × " + dims.height + "…");
-    $("addLayer").disabled = $("download").disabled = true;
+    $("addLayer").disabled = $("download").disabled = $("updateLayer").disabled = true;
     setTimeout(function () {
       try {
         var output = document.createElement("canvas");
         output.width = dims.width; output.height = dims.height;
         renderMesh(output.getContext("2d"), dims.width, dims.height, colors, edges, Number($("spread").value) / 100, Number($("feather").value), $("smoothEdges").checked);
         callback(output.toDataURL("image/png"));
-      } catch (error) { setStatus("Render failed: " + error.message, true); }
-      finally { $("addLayer").disabled = $("download").disabled = false; }
+      } catch (error) { setStatus("Render failed: " + error.message, true); if (onError) onError(error); }
+      finally { $("addLayer").disabled = $("download").disabled = false; updateLinkStatus(); }
     }, 20);
   }
   function evalHost(expression, callback) {
     if (!window.__adobe_cep__ || !window.__adobe_cep__.evalScript) { setStatus("Open this panel in Photoshop to use this action.", true); return; }
     window.__adobe_cep__.evalScript(expression, callback);
+  }
+  function sendMeshToPhotoshop(mode, callback) {
+    if (!window.__adobe_cep__ || !window.__adobe_cep__.evalScript) {
+      setStatus("Open this panel in Photoshop to use live layers.", true);
+      callback(false); return;
+    }
+    buildPng(function (dataUrl) {
+      var filePath;
+      try {
+        var fs = require("fs"), os = require("os"), path = require("path");
+        filePath = path.join(os.tmpdir(), "gradient-mesh-" + Date.now() + "-" + Math.random().toString(36).slice(2) + ".png");
+        fs.writeFileSync(filePath, Buffer.from(dataUrl.split(",")[1], "base64"));
+      } catch (error) { setStatus("Could not write temporary PNG: " + error.message, true); callback(false); return; }
+      var marker = mode === "create" ? "GM-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 8) : linkedMarker;
+      var quotedPath = JSON.stringify(filePath.replace(/\\/g, "/"));
+      var expression = mode === "create"
+        ? "gradientMeshPlaceEditable(" + quotedPath + "," + JSON.stringify(marker) + "," + ($("fitLayer").checked ? "true" : "false") + ")"
+        : "gradientMeshReplaceEditable(" + quotedPath + "," + JSON.stringify(marker) + ")";
+      evalHost(expression, function (result) {
+        try { require("fs").unlinkSync(filePath); } catch (ignore) {}
+        var ok = !!result && result.indexOf("OK:") === 0;
+        if (ok && mode === "create") {
+          linkedMarker = marker;
+          saveLinkedModel();
+          updateLinkStatus();
+        }
+        setStatus((result || "Photoshop did not respond.").replace(/^(OK:|ERROR:)/, ""), !ok);
+        callback(ok);
+      });
+    }, function () { callback(false); });
+  }
+  function updateLinkedLayer() {
+    if (!linkedMarker || liveBusy) return;
+    clearTimeout(liveTimer);
+    liveBusy = true;
+    var sentRevision = meshRevision;
+    sendMeshToPhotoshop("update", function () {
+      liveBusy = false;
+      if (meshRevision !== sentRevision) queueLiveUpdate();
+    });
   }
   function deleteSelected() {
     var list = selected.kind === "color" ? colors : edges;
@@ -362,7 +521,11 @@
     if (dragging.kind === "edge") $("shape").value = "custom";
     updateSelected(); queuePreview();
   });
-  window.addEventListener("pointerup", function () { dragging = null; });
+  window.addEventListener("pointerup", function () {
+    var wasDragging = !!dragging;
+    dragging = null;
+    if (wasDragging) queueLiveUpdate();
+  });
   $("addColor").addEventListener("click", function () {
     var base = selected.kind === "color" ? colors[selected.index] : {x:.5,y:.5,color:"#ff758d"};
     colors.push({x:clamp(base.x + .08,.08,.92),y:clamp(base.y + .08,.08,.92),color:base.color});
@@ -412,6 +575,14 @@
       setColor(color); setStatus("Selected point now uses Photoshop's foreground color.");
     });
   });
+  $("savePreset").addEventListener("click", saveCurrentPreset);
+  $("presetName").addEventListener("keydown", function (event) {
+    if (event.key === "Enter") { event.preventDefault(); saveCurrentPreset(); }
+  });
+  $("liveUpdate").addEventListener("change", function () { updateLinkStatus(); if (this.checked) queueLiveUpdate(); });
+  ["outputWidth", "outputHeight", "fitLayer"].forEach(function (id) {
+    $(id).addEventListener("change", function () { meshRevision++; saveLinkedModel(); queueLiveUpdate(); });
+  });
   $("randomize").addEventListener("click", function () {
     paletteIndex = (paletteIndex + 1) % palettes.length;
     var layout = makeColors(Number($("grid").value), palettes[paletteIndex]);
@@ -427,23 +598,31 @@
       if (!result || result.indexOf("OK:") !== 0) { setStatus((result || "Photoshop did not respond.").replace(/^ERROR:/,""), true); return; }
       var size = result.slice(3).split("|");
       $("outputWidth").value = size[0]; $("outputHeight").value = size[1];
+      meshRevision++; saveLinkedModel(); queueLiveUpdate();
       setStatus("Using active document dimensions.");
     });
   });
   $("addLayer").addEventListener("click", function () {
-    if (!window.__adobe_cep__) { setStatus("Open this panel in Photoshop to add a layer.", true); return; }
-    buildPng(function (dataUrl) {
-      var filePath;
-      try {
-        var fs = require("fs"), os = require("os"), path = require("path");
-        filePath = path.join(os.tmpdir(), "gradient-mesh-" + Date.now() + ".png");
-        fs.writeFileSync(filePath, Buffer.from(dataUrl.split(",")[1], "base64"));
-      } catch (error) { setStatus("Could not write temporary PNG: " + error.message, true); return; }
-      var fit = $("fitLayer").checked ? "true" : "false";
-      evalHost("gradientMeshPlace(" + JSON.stringify(filePath.replace(/\\/g,"/")) + "," + fit + ")", function (result) {
-        try { require("fs").unlinkSync(filePath); } catch (ignore) {}
-        setStatus((result || "Photoshop did not respond.").replace(/^(OK:|ERROR:)/,""), !result || result.indexOf("OK:") !== 0);
-      });
+    if (liveBusy) return;
+    clearTimeout(liveTimer);
+    liveBusy = true;
+    sendMeshToPhotoshop("create", function () { liveBusy = false; });
+  });
+  $("updateLayer").addEventListener("click", updateLinkedLayer);
+  $("loadActiveLayer").addEventListener("click", function () {
+    evalHost("gradientMeshActiveMarker()", function (result) {
+      if (!result || result.indexOf("OK:") !== 0) {
+        setStatus((result || "Photoshop did not respond.").replace(/^ERROR:/, ""), true); return;
+      }
+      var marker = result.slice(3), model;
+      try { model = JSON.parse(localStorage.getItem(layerKey + marker) || "null"); }
+      catch (error) { model = null; }
+      if (!validModel(model)) { setStatus("Editable mesh data for this layer is unavailable on this computer.", true); return; }
+      linkedMarker = null;
+      if (!applyModel(model)) return;
+      linkedMarker = marker;
+      updateLinkStatus();
+      setStatus("Editing selected Gradient Mesh layer.");
     });
   });
   $("download").addEventListener("click", function () {
@@ -456,6 +635,9 @@
   });
   colors = makeColors(3, palettes[0]);
   edges = makeShape("rectangle");
+  presets = readPresets();
+  renderPresetGallery();
+  updateLinkStatus();
   var initialBounds = shapeBounds(edges);
   fitShapeInsideFeather();
   remapColors(initialBounds, shapeBounds(edges));

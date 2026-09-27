@@ -40,7 +40,7 @@ h1 { font-size:24px; letter-spacing:-.05em; font-weight:750; margin:0; line-heig
 .section-title h2 { font-size:14px; font-weight:700; margin:0; }
 .second { border-top:1px solid #302f34; padding-top:18px; margin-top:18px; }
 .row { display:flex; justify-content:space-between; align-items:center; margin:11px 0; font-size:12px; color:#c4c0c3; }
-select, .dimensions input, #hexColor { background:#252429; border:1px solid #3a393e; border-radius:8px; color:#f5f1ef; outline:none; }
+select, .dimensions input, #hexColor, #presetName { background:#252429; border:1px solid #3a393e; border-radius:8px; color:#f5f1ef; outline:none; }
 select:focus, input:focus-visible, button:focus-visible { outline:2px solid #ff9b79; outline-offset:2px; }
 select { width:120px; padding:7px 10px; }
 .toggle-row { display:flex; align-items:center; gap:8px; margin:8px 0 12px; color:#a8a4aa; font-size:11px; cursor:pointer; }
@@ -63,6 +63,17 @@ input[type=color] { width:40px; height:34px; border:0; padding:0; background:tra
 .sample-actions button { flex:1; }
 .sample-actions button.active { color:#1f1717; background:#ffb08e; }
 .editor-help { color:#aaa5aa; font-size:11px; line-height:1.5; margin:10px 0 0; }
+.save-row { display:flex; gap:7px; margin:0 0 11px; }
+#presetName { min-width:0; flex:1; padding:9px 10px; font-size:11px; }
+.save-row button { padding:8px 11px; background:#ff9e7c; color:#21181a; border:0; border-radius:8px; font-size:11px; font-weight:700; }
+.preset-gallery { display:grid; grid-template-columns:repeat(auto-fill,minmax(92px,1fr)); gap:8px; }
+.preset-card { position:relative; min-width:0; padding:0; overflow:hidden; border:1px solid #454047; border-radius:10px; background:#252429; color:#eee9e6; text-align:left; }
+.preset-card:hover,.preset-card:focus-within { border-color:#ffad8e; }
+.preset-open { display:block; width:100%; padding:0; border:0; background:transparent; color:inherit; text-align:left; }
+.preset-card img { display:block; width:100%; aspect-ratio:1; object-fit:cover; background:#39373c; }
+.preset-card span { display:block; overflow:hidden; padding:7px 25px 7px 7px; font-size:10px; text-overflow:ellipsis; white-space:nowrap; }
+.preset-delete { position:absolute; right:4px; bottom:4px; width:20px; height:20px; border:0; border-radius:5px; background:#563638; color:#fff; font-size:15px; line-height:18px; }
+.preset-empty { margin:0; padding:13px; border:1px dashed #49454b; border-radius:9px; color:#9b969d; font-size:11px; }
 .dimensions { display:flex; gap:8px; align-items:center; }
 .dimensions label { display:flex; align-items:center; gap:8px; flex:1; color:#85828a; font-size:11px; font-weight:700; }
 .dimensions input { min-width:0; width:100%; padding:9px; font-size:12px; }
