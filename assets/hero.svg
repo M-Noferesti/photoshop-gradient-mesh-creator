@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="480" viewBox="0 0 1200 480" role="img" aria-labelledby="title desc">
+  <title id="title">Gradient Mesh Creator</title>
+  <desc id="desc">A luminous freeform gradient mesh with visible color and shape points.</desc>
+  <defs>
+    <radialGradient id="pink"><stop stop-color="#ff809f"/><stop offset="1" stop-color="#ff809f" stop-opacity="0"/></radialGradient>
+    <radialGradient id="blue"><stop stop-color="#65b4ff"/><stop offset="1" stop-color="#65b4ff" stop-opacity="0"/></radialGradient>
+    <radialGradient id="purple"><stop stop-color="#ac76ff"/><stop offset="1" stop-color="#ac76ff" stop-opacity="0"/></radialGradient>
+    <radialGradient id="peach"><stop stop-color="#ffd39f"/><stop offset="1" stop-color="#ffd39f" stop-opacity="0"/></radialGradient>
+    <linearGradient id="edge" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f5b86f"/><stop offset="1" stop-color="#ffdc9c"/></linearGradient>
+    <clipPath id="shape"><path d="M721 95 C828 36 979 74 1054 168 C1114 244 1051 363 965 406 C867 455 719 397 655 329 C584 253 625 150 721 95 Z"/></clipPath>
+    <filter id="soft"><feGaussianBlur stdDeviation="19"/></filter>
+  </defs>
+  <rect width="1200" height="480" rx="28" fill="#11151e"/>
+  <path d="M0 382 H1200 M0 241 H1200 M596 0 V480 M903 0 V480" stroke="#ffffff" stroke-opacity=".045"/>
+  <circle cx="1082" cy="76" r="230" fill="#7e67dc" opacity=".08"/>
+  <text x="70" y="102" fill="#9ba8c4" font-family="Arial,sans-serif" font-size="16" font-weight="700" letter-spacing="4">PHOTOSHOP CEP EXTENSION</text>
+  <text x="67" y="203" fill="#f5f7fb" font-family="Arial,sans-serif" font-size="67" font-weight="700">Gradient Mesh</text>
+  <text x="69" y="268" fill="#f5f7fb" font-family="Arial,sans-serif" font-size="67" font-weight="700">Creator<tspan fill="#faac7f">.</tspan></text>
+  <text x="71" y="327" fill="#b8c2d5" font-family="Arial,sans-serif" font-size="20">Color points. Freeform shapes. Soft edges.</text>
+  <rect x="70" y="370" width="144" height="39" rx="19.5" fill="#202a38" stroke="#536479"/>
+  <text x="91" y="396" fill="#dbe7f8" font-family="Arial,sans-serif" font-size="15" font-weight="700">v1.3.2  •  CEP</text>
+  <g clip-path="url(#shape)">
+    <path d="M721 95 C828 36 979 74 1054 168 C1114 244 1051 363 965 406 C867 455 719 397 655 329 C584 253 625 150 721 95 Z" fill="#7356a7"/>
+    <ellipse cx="766" cy="174" rx="185" ry="164" fill="url(#pink)"/>
+    <ellipse cx="980" cy="163" rx="172" ry="154" fill="url(#peach)"/>
+    <ellipse cx="800" cy="350" rx="190" ry="168" fill="url(#blue)"/>
+    <ellipse cx="1017" cy="338" rx="175" ry="154" fill="url(#purple)"/>
+  </g>
+  <path d="M721 95 C828 36 979 74 1054 168 C1114 244 1051 363 965 406 C867 455 719 397 655 329 C584 253 625 150 721 95 Z" fill="none" stroke="url(#edge)" stroke-width="2" opacity=".85"/>
+  <path d="M721 95 C828 36 979 74 1054 168 C1114 244 1051 363 965 406 C867 455 719 397 655 329 C584 253 625 150 721 95 Z" fill="none" stroke="#d690e5" stroke-width="23" opacity=".16" filter="url(#soft)"/>
+  <g fill="none" stroke="#f7cc8a" stroke-opacity=".55" stroke-width="1.5"><path d="M721 95 L657 134 M721 95 L797 53 M1054 168 L1090 221 M1054 168 L1012 112"/></g>
+  <g fill="#f9cc81" stroke="#11151e" stroke-width="3"><path d="M721 86 l9 9 -9 9 -9 -9z"/><path d="M1054 159 l9 9 -9 9 -9 -9z"/><path d="M965 397 l9 9 -9 9 -9 -9z"/><path d="M655 320 l9 9 -9 9 -9 -9z"/></g>
+  <g stroke="#fff" stroke-width="3"><circle cx="746" cy="178" r="10" fill="#ff809f"/><circle cx="970" cy="150" r="10" fill="#ffd39f"/><circle cx="812" cy="340" r="10" fill="#65b4ff"/><circle cx="1003" cy="329" r="10" fill="#ac76ff"/></g>
+  <g fill="#f9cc81" stroke="#11151e" stroke-width="2"><circle cx="657" cy="134" r="5"/><circle cx="797" cy="53" r="5"/><circle cx="1090" cy="221" r="5"/><circle cx="1012" cy="112" r="5"/></g>
+</svg>
