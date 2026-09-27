@@ -34,10 +34,11 @@
   }
   function validModel(model) {
     function validPoint(p) { return p && isFinite(p.x) && isFinite(p.y) && p.x >= -1 && p.x <= 2 && p.y >= -1 && p.y <= 2; }
+    function validVector(p) { return p && isFinite(p.x) && isFinite(p.y) && Math.abs(p.x) <= 2 && Math.abs(p.y) <= 2; }
     return model && Array.isArray(model.colors) && model.colors.length >= 1 && model.colors.length <= 64 &&
       Array.isArray(model.edges) && model.edges.length >= 3 && model.edges.length <= 64 &&
       model.colors.every(function (p) { return validPoint(p) && validHex(p.color); }) &&
-      model.edges.every(function (p) { return validPoint(p) && validPoint(p.in) && validPoint(p.out); }) &&
+      model.edges.every(function (p) { return validPoint(p) && validVector(p.in) && validVector(p.out); }) &&
       isFinite(model.spread) && isFinite(model.feather) && isFinite(model.width) && isFinite(model.height) &&
       model.spread >= 20 && model.spread <= 90 && model.feather >= 0 && model.feather <= 12 &&
       Number.isInteger(model.width) && Number.isInteger(model.height) &&
@@ -267,9 +268,10 @@
       remove.setAttribute("aria-label", "Delete saved mesh " + preset.name);
       remove.textContent = "×";
       remove.addEventListener("click", function () {
-        presets = presets.filter(function (item) { return item.id !== preset.id; });
-        try { localStorage.setItem(presetKey, JSON.stringify(presets)); }
+        var remaining = presets.filter(function (item) { return item.id !== preset.id; });
+        try { localStorage.setItem(presetKey, JSON.stringify(remaining)); }
         catch (error) { setStatus("Could not update saved meshes.", true); return; }
+        presets = remaining;
         renderPresetGallery(); setStatus("Saved mesh deleted.");
       });
       card.appendChild(open); card.appendChild(remove); gallery.appendChild(card);
@@ -282,10 +284,12 @@
     var item = {id:"P-" + Date.now().toString(36),name:name,model:model,preview:presetThumbnail(model)};
     var existing = presets.findIndex(function (saved) { return saved.name.toLowerCase() === name.toLowerCase(); });
     if (existing === -1 && presets.length >= 36) { setStatus("Saved mesh library is full. Delete an entry before adding another.", true); return; }
-    if (existing !== -1) { item.id = presets[existing].id; presets.splice(existing, 1); }
-    presets.unshift(item);
-    try { localStorage.setItem(presetKey, JSON.stringify(presets)); }
+    var updated = presets.slice();
+    if (existing !== -1) { item.id = updated[existing].id; updated.splice(existing, 1); }
+    updated.unshift(item);
+    try { localStorage.setItem(presetKey, JSON.stringify(updated)); }
     catch (error) { setStatus("Could not save mesh. Local storage may be full.", true); return; }
+    presets = updated;
     $("presetName").value = name;
     renderPresetGallery(); setStatus("Saved " + name + " with preview.");
   }
