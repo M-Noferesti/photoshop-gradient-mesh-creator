@@ -9,7 +9,7 @@
 
   <p>
     <img alt="Photoshop CEP" src="https://img.shields.io/badge/Photoshop-CEP%20panel-121820?style=for-the-badge&logo=adobephotoshop&logoColor=31A8FF" />
-    <img alt="Version 1.3.2" src="https://img.shields.io/badge/version-1.3.2-121820?style=for-the-badge" />
+    <img alt="Version 1.3.3" src="https://img.shields.io/badge/version-1.3.3-121820?style=for-the-badge" />
     <img alt="No npm dependencies" src="https://img.shields.io/badge/dependencies-none-121820?style=for-the-badge" />
   </p>
 </div>
@@ -34,7 +34,7 @@ The manifest requests **CEP 9 or newer** and Photoshop host version **20 or newe
 
 1. Pick a **Shape** preset and **Color layout**. The shape and color systems remain independent when you change either preset.
 2. Drag colored circles to move color points. Double-click inside the preview or choose **+ Color point** to add one. Select a point to use the color swatch, enter a `#RRGGBB` hex value, or sample a color from the preview. **Use Photoshop foreground** reads Photoshop's current foreground color; Photoshop's eyedropper can set it first.
-3. Drag gold diamonds to reshape the boundary. Choose **+ Shape point** to add a point on the selected outline segment. Turn on **Smooth outline** and drag the small incoming and outgoing Bézier handles to tune the curve.
+3. Drag gold diamonds to reshape the boundary. Choose **+ Shape point** to add a point on the selected outline segment. Turn on **Smooth outline** and drag the small incoming and outgoing Bézier handles to tune the curve. Handles can travel beyond the preview edge. Opposite handles stay aligned in a straight tangent; hold **Alt** while dragging to adjust one independently.
 4. Select either point type and press **Delete**, or choose **Delete selected**, to remove it. The mesh retains at least one color point and three shape points.
 5. Adjust **Blend radius** and **Soft edge**. Enter the output width and height, then choose **Add as Photoshop layer** or **Download PNG**.
 

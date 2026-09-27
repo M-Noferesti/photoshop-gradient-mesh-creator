@@ -333,9 +333,20 @@
     var point = (dragging.kind === "color" ? colors : edges)[dragging.index];
     var x = (event.clientX - rect.left) / rect.width, y = (event.clientY - rect.top) / rect.height;
     if (dragging.handle) {
-      var margin = safetyMargin();
-      point[dragging.handle].x = clamp(x, margin, 1 - margin) - point.x;
-      point[dragging.handle].y = clamp(y, margin, 1 - margin) - point.y;
+      var side = dragging.handle, opposite = side === "in" ? "out" : "in";
+      var oldOpposite = point[opposite];
+      var oppositeLength = Math.sqrt(oldOpposite.x * oldOpposite.x + oldOpposite.y * oldOpposite.y);
+      var handleX = clamp(x, -.15, 1.15) - point.x;
+      var handleY = clamp(y, -.15, 1.15) - point.y;
+      point[side].x = handleX;
+      point[side].y = handleY;
+      if (!event.altKey) {
+        var length = Math.sqrt(handleX * handleX + handleY * handleY);
+        if (length > .001) {
+          point[opposite].x = -handleX / length * oppositeLength;
+          point[opposite].y = -handleY / length * oppositeLength;
+        }
+      }
     } else if (dragging.kind === "edge") {
       var safe = safetyMargin();
       var minX = $("smoothEdges").checked ? Math.min(0, point.in.x, point.out.x) : 0;

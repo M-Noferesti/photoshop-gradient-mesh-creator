@@ -18,7 +18,7 @@
   <text x="69" y="268" fill="#f5f7fb" font-family="Arial,sans-serif" font-size="67" font-weight="700">Creator<tspan fill="#faac7f">.</tspan></text>
   <text x="71" y="327" fill="#b8c2d5" font-family="Arial,sans-serif" font-size="20">Color points. Freeform shapes. Soft edges.</text>
   <rect x="70" y="370" width="144" height="39" rx="19.5" fill="#202a38" stroke="#536479"/>
-  <text x="91" y="396" fill="#dbe7f8" font-family="Arial,sans-serif" font-size="15" font-weight="700">v1.3.2  •  CEP</text>
+  <text x="91" y="396" fill="#dbe7f8" font-family="Arial,sans-serif" font-size="15" font-weight="700">v1.3.3  •  CEP</text>
   <g clip-path="url(#shape)">
     <path d="M721 95 C828 36 979 74 1054 168 C1114 244 1051 363 965 406 C867 455 719 397 655 329 C584 253 625 150 721 95 Z" fill="#7356a7"/>
     <ellipse cx="766" cy="174" rx="185" ry="164" fill="url(#pink)"/>
